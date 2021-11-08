@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('chrome') // Uses web-only Flutter SDK
-
 import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
@@ -21,19 +19,19 @@ void main() {
   group('Create with an objectUrl', () {
     final XFile file = XFile(textFileUrl);
 
-    test('Can be read as a string', () async {
+    testWidgets('Can be read as a string', (WidgetTester  tester) async {
       expect(await file.readAsString(), equals(expectedStringContents));
     });
 
-    test('Can be read as bytes', () async {
+    testWidgets('Can be read as bytes', (WidgetTester tester) async {
       expect(await file.readAsBytes(), equals(bytes));
     });
 
-    test('Can be read as a stream', () async {
+    testWidgets('Can be read as a stream', (WidgetTester tester) async {
       expect(await file.openRead().first, equals(bytes));
     });
 
-    test('Stream can be sliced', () async {
+    testWidgets('Stream can be sliced', (WidgetTester tester) async {
       expect(await file.openRead(2, 5).first, equals(bytes.sublist(2, 5)));
     });
   });
@@ -41,19 +39,19 @@ void main() {
   group('Create from data', () {
     final XFile file = XFile.fromData(bytes);
 
-    test('Can be read as a string', () async {
+    testWidgets('Can be read as a string', (WidgetTester tester) async {
       expect(await file.readAsString(), equals(expectedStringContents));
     });
 
-    test('Can be read as bytes', () async {
+    testWidgets('Can be read as bytes', (WidgetTester tester) async {
       expect(await file.readAsBytes(), equals(bytes));
     });
 
-    test('Can be read as a stream', () async {
+    testWidgets('Can be read as a stream', (WidgetTester tester) async {
       expect(await file.openRead().first, equals(bytes));
     });
 
-    test('Stream can be sliced', () async {
+    testWidgets('Stream can be sliced', (WidgetTester tester) async {
       expect(await file.openRead(2, 5).first, equals(bytes.sublist(2, 5)));
     });
   });
@@ -61,7 +59,7 @@ void main() {
   group('Blob backend', () {
     final XFile file = XFile(textFileUrl);
 
-    test('Stores data as a Blob', () async {
+    testWidgets('Stores data as a Blob', (WidgetTester tester) async {
       // Read the blob from its path 'natively'
       final Object response = await html.window.fetch(file.path);
       // Call '.arrayBuffer()' on the fetch response object to look at its bytes.
@@ -71,7 +69,7 @@ void main() {
       expect(data.asUint8List(), equals(bytes));
     });
 
-    test('Data may be purged from the blob!', () async {
+    testWidgets('Data may be purged from the blob!', (WidgetTester tester) async {
       html.Url.revokeObjectUrl(file.path);
 
       expect(() async {
@@ -84,34 +82,34 @@ void main() {
     const String crossFileDomElementId = '__x_file_dom_element';
 
     group('CrossFile saveTo(..)', () {
-      test('creates a DOM container', () async {
+      testWidgets('creates a DOM container', (WidgetTester tester) async {
         final XFile file = XFile.fromData(bytes);
 
         await file.saveTo('');
 
         final html.Element? container =
-            html.querySelector('#$crossFileDomElementId');
+        html.querySelector('#$crossFileDomElementId');
 
         expect(container, isNotNull);
       });
 
-      test('create anchor element', () async {
+      testWidgets('create anchor element', (WidgetTester tester) async {
         final XFile file = XFile.fromData(bytes, name: textFile.name);
 
         await file.saveTo('path');
 
         final html.Element container =
-            html.querySelector('#$crossFileDomElementId')!;
+        html.querySelector('#$crossFileDomElementId')!;
         final html.AnchorElement element = container.children
-                .firstWhere((html.Element element) => element.tagName == 'A')
-            as html.AnchorElement;
+            .firstWhere((html.Element element) => element.tagName == 'A')
+        as html.AnchorElement;
 
         // if element is not found, the `firstWhere` call will throw StateError.
         expect(element.href, file.path);
         expect(element.download, file.name);
       });
 
-      test('anchor element is clicked', () async {
+      testWidgets('anchor element is clicked', (WidgetTester tester) async {
         final html.AnchorElement mockAnchor = html.AnchorElement();
 
         final CrossFileTestOverrides overrides = CrossFileTestOverrides(
@@ -119,7 +117,7 @@ void main() {
         );
 
         final XFile file =
-            XFile.fromData(bytes, name: textFile.name, overrides: overrides);
+        XFile.fromData(bytes, name: textFile.name, overrides: overrides);
 
         bool clicked = false;
         mockAnchor.onClick.listen((html.MouseEvent event) => clicked = true);
